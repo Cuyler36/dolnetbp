@@ -498,14 +498,14 @@ static s32 WaitResult(void) {
     }
 }
 
-long MDMInit(char* countrycode) {
+s32 MDMInit(char* countrycode) {
     static BOOL firsttime = FALSE;
     static BOOL regflag = FALSE;
 
     u32 cid;
     char buf[128];
 
-    if (strcmp(countrycode, "00") == 0 || strcmp(countrycode, "B5") == 0) {
+    if (strcmp(countrycode, MDM_COUNTRYCODE_JAPAN) == 0 || strcmp(countrycode, MDM_COUNTRYCODE_USA) == 0) {
         atAndPFlag = TRUE;
     }
 
@@ -589,7 +589,7 @@ long MDMInit(char* countrycode) {
     writecmd(0x0100, mr.imr);
     EXISetExiCallback(2, &exiinthandler);
     EXIUnlock(0);
-    return 1;
+    return MDM_OK;
 }
 
 static char* prohibited_commands[22] = {
@@ -735,19 +735,19 @@ s32 MDMRecv(u8* buf, s32 maxlen, void (*cb)(s32)) {
     return MDM_OK;
 }
 
-long MDMRecvSync(u8* buf /* r30 */) {
-    s32 len; // r31
-    s32 recvlen; // r22
-    u32 mdmcmd; // r1+0xC
-    BOOL ret; // r19
-    u8* tmp1; // r26
-    u8* tmp2; // r25
-    u8* buf1; // r23
-    u8* buf2; // r21
-    u8* buf3; // r20
-    s32 len1; // r29
-    s32 len2; // r28
-    s32 len3; // r24
+s32 MDMRecvSync(u8* buf) {
+    s32 len;
+    s32 recvlen;
+    u32 mdmcmd;
+    BOOL ret;
+    u8* tmp1;
+    u8* tmp2;
+    u8* buf1;
+    u8* buf2;
+    u8* buf3;
+    s32 len1;
+    s32 len2;
+    s32 len3;
 
     if (rs.recvbusy != FALSE) {
         return -5;
@@ -841,7 +841,7 @@ long MDMRecvSync(u8* buf /* r30 */) {
     return len;
 }
 
-long MDSend(u8* buf, s32 len, void (*cb)(s32)) {
+s32 MDSend(u8* buf, s32 len, void (*cb)(s32)) {
     if (ss.sendbusy) {
         return -4;
     }

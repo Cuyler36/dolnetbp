@@ -7,6 +7,9 @@
 extern "C" {
 #endif
 
+#define MDM_COUNTRYCODE_JAPAN "00"
+#define MDM_COUNTRYCODE_USA "B5"
+
 #define MDM_OK 1
 
 #define CO_DATAFIFOSIZE 0x200
@@ -76,6 +79,25 @@ inline char mytoupper(char ch) {
 
     return ch;
 }
+
+s32 MDMInit(char* countrycode);
+s32 MDMATCommand(char* atcmd);
+s32 MDMAnswer(void (*cb)(s32));
+void MDMHangUp(void);
+s32 MDMRecv(u8* buf, s32 maxlen, void (*cb)(s32));
+s32 MDMRecvSync(u8* buf);
+s32 MDSend(u8* buf, s32 len, void (*cb)(s32));
+BOOL MDMSendBusy(void);
+s32 MDMDial(char* dialstr, s32 dialmode, void (*cb)(s32));
+s32 MDMChangeThreshold(s32 txth, s32 rxth);
+void MDMSetFWT(s32 fwt);
+u8 MDMGetESR(void);
+u8 MDMGetRawStatus(void);
+s32 MDMConnectMode(s32 mode);
+s32 MDMErrorCorrectMode(s32 mode);
+s32 MDMCompressMode(s32 mode);
+s32 MDMGetStatus(MDM_CONNECTSTAT* stat);
+s32 MDMGetLibraryVersion(void);
 
 #ifdef __cplusplus
 }
