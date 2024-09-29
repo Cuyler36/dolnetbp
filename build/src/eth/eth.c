@@ -1,4 +1,4 @@
-#include "eth/include/eth.h"
+#include "build/include/eth/eth.h"
 #include <dolphin/os_internal.h>
 
 #ifdef DEBUG
@@ -219,9 +219,9 @@ static u8 StaInput(void) {
     return bit;
 }
 
-static u16 PhyRead(unsigned int regNo /* r29 */) {
-    int i; // r31
-    u16 value; // r30
+static u16 PhyRead(unsigned int regNo) {
+    int i;
+    u16 value;
 
     /* Clear command */
     for (i = 0; i < 32; i++) {
@@ -248,7 +248,6 @@ static u16 PhyRead(unsigned int regNo /* r29 */) {
     writecmd(0x0060, 4);
     value = StaInput();
     value = StaInput();
-    
     
     /* Read value */
     value = 0;
@@ -387,7 +386,7 @@ static void recvsub1(void) {
                 }
                 
                 if (i == protonum) {
-                    goto update_pointers; // issue, would prefer no goto if possible
+                    goto update_pointers;
                 }
             }
 
@@ -476,6 +475,8 @@ static void readbuffer1(s32 chan, OSContext* context) {
     recvsub1();
     __ETHInterruptTime = OSGetTime() - __OSLastInterruptTime;
 }
+
+#include "build/include/eth/hashfunc.c"
 
 static void patchthru(void) {
     u32 rnda;
@@ -884,14 +885,14 @@ s32 ETHGetBBAType(void) {
     return 2;
 }
 
-static u16 HashIndex(const u8* address /* r3 */) {
-    u32 crc; // r31
-    u16 index; // r28
-    u32 msb; // r25
-    u8 byte; // r27
-    s32 byteLen; // r26
-    s32 bit; // r30
-    s32 shift; // r29
+static u16 HashIndex(const u8* address) {
+    u32 crc;
+    u16 index;
+    u32 msb;
+    u8 byte;
+    s32 byteLen;
+    s32 bit;
+    s32 shift;
 
     crc = 0xFFFFFFFF;
     index = 0;

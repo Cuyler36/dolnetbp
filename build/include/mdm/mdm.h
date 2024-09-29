@@ -1,14 +1,12 @@
-#ifndef _DOLPHIN_OS_MDM_H_
-#define _DOLPHIN_OS_MDM_H_
+#ifndef _DOLPHIN_OS_MDM_PRIVATE_H_
+#define _DOLPHIN_OS_MDM_PRIVATE_H_
 
 #include <dolphin/types.h>
+#include <dolphin/mdm.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define MDM_COUNTRYCODE_JAPAN "00"
-#define MDM_COUNTRYCODE_USA "B5"
 
 #define MDM_OK 1
 
