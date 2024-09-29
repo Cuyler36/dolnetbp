@@ -539,7 +539,7 @@ s32 MDMInit(char* countrycode) {
     rs.mode = 1;
     
     cid = readCID();
-    if (cid != 0x02020000) {
+    if (cid != EXI_MODEM) {
         EXIUnlock(0);
         return -1;
     }
