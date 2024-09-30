@@ -23,6 +23,10 @@ endif
 BUILD_DIR := build/build
 TOOLS_DIR := $(BUILD_DIR)/tools
 BASEROM_DIR := baserom
+
+# Define the output directory for the .a files
+OUTPUT_DIR := out
+
 TARGET_LIBS := mdm              \
                eth              \
                netcfg
@@ -37,6 +41,10 @@ PYTHON := python3
 
 # Every file has a debug version. Append D to the list.
 TARGET_LIBS_DEBUG := $(addsuffix D,$(TARGET_LIBS))
+
+# Define the paths to the output .a files
+RELEASE_LIBS := $(addprefix $(OUTPUT_DIR)/,$(addsuffix .a,$(TARGET_LIBS)))
+DEBUG_LIBS := $(addprefix $(OUTPUT_DIR)/,$(addsuffix .a,$(TARGET_LIBS_DEBUG)))
 
 # TODO, decompile
 SRC_DIRS := $(shell find build/src -type d)
@@ -84,7 +92,7 @@ CC        = $(MWCC)
 
 CHARFLAGS := -char signed
 
-CFLAGS = $(CHARFLAGS) -lang=c++ -nodefaults -proc gekko -fp hard -Cpp_exceptions off -enum int -warn pragmas -requireprotos -pragma 'cats off'
+CFLAGS = $(CHARFLAGS) -lang=c -nodefaults -proc gekko -fp hard -Cpp_exceptions off -enum int -warn pragmas -requireprotos -pragma 'cats off'
 INCLUDES := -Ibuild/include -Idolphin/include/libc -Idolphin/include -ir build/src
 
 ASFLAGS = -mgekko -I build/src -I build/include
@@ -104,7 +112,7 @@ TARGET_LIBS_DEBUG := $(addprefix baserom/,$(addsuffix .a,$(TARGET_LIBS_DEBUG)))
 
 default: all
 
-all: $(DTK) eth.a ethD.a mdm.a mdmD.a netcfg.a netcfgD.a stub.o
+all: $(DTK) $(RELEASE_LIBS) $(DEBUG_LIBS)
 
 verify: build/build/release/test.bin build/build/debug/test.bin build/build/verify.sha1
 	@sha1sum -c build/build/verify.sha1
@@ -113,7 +121,7 @@ extract: $(DTK)
 	$(info Extracting files...)
 	@$(DTK) ar extract $(TARGET_LIBS) --out baserom/release/src
 	@$(DTK) ar extract $(TARGET_LIBS_DEBUG) --out baserom/debug/src
-    # Thank you GPT, very cool. Temporary hack to remove D off of inner src folders to let objdiff work.
+        # Thank you GPT, very cool. Temporary hack to remove D off of inner src folders to let objdiff work.
 	@for dir in $$(find baserom/debug/src -type d -name 'src'); do \
 		find "$$dir" -mindepth 1 -maxdepth 1 -type d | while read subdir; do \
 			mv "$$subdir" "$${subdir%?}"; \
@@ -133,7 +141,7 @@ distclean:
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -rf *.a
+	rm -rf $(OUTPUT_DIR)
 
 $(TOOLS_DIR):
 	$(QUIET) mkdir -p $(TOOLS_DIR)
@@ -161,32 +169,36 @@ build/build/release/build/src/%.o: build/src/%.c
 # For eth.a
 eth_c_files := $(wildcard build/src/eth/*.c)
 eth_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/release/build/src/%.o,$(eth_c_files))
-eth.a : $(eth_obj_files)
+$(OUTPUT_DIR)/eth.a : $(eth_obj_files) | $(OUTPUT_DIR)
 
 # For ethD.a
 ethD_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/debug/build/src/%.o,$(eth_c_files))
-ethD.a : $(ethD_obj_files)
+$(OUTPUT_DIR)/ethD.a : $(ethD_obj_files) | $(OUTPUT_DIR)
 
 # Similarly for mdm.a and mdmD.a
 mdm_c_files := $(wildcard build/src/mdm/*.c)
 mdm_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/release/build/src/%.o,$(mdm_c_files))
-mdm.a : $(mdm_obj_files)
+$(OUTPUT_DIR)/mdm.a : $(mdm_obj_files) | $(OUTPUT_DIR)
 
 mdmD_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/debug/build/src/%.o,$(mdm_c_files))
-mdmD.a : $(mdmD_obj_files)
+$(OUTPUT_DIR)/mdmD.a : $(mdmD_obj_files) | $(OUTPUT_DIR)
 
 # And for netcfg.a and netcfgD.a
 netcfg_c_files := $(wildcard build/src/netcfg/*.c)
 netcfg_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/release/build/src/%.o,$(netcfg_c_files))
-netcfg.a : $(netcfg_obj_files)
+$(OUTPUT_DIR)/netcfg.a : $(netcfg_obj_files) | $(OUTPUT_DIR)
 
 netcfgD_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/debug/build/src/%.o,$(netcfg_c_files))
-netcfgD.a : $(netcfgD_obj_files)
+$(OUTPUT_DIR)/netcfgD.a : $(netcfgD_obj_files) | $(OUTPUT_DIR)
+
+# Ensure the output directory exists
+$(OUTPUT_DIR):
+	@mkdir -p $(OUTPUT_DIR)
 
 build/build/release/baserom.elf: build/build/release/src/stub.o $(foreach l,$(VERIFY_LIBS),baserom/$(l).a)
-build/build/release/test.elf:    build/build/release/src/stub.o $(foreach l,$(VERIFY_LIBS),$(l).a)
+build/build/release/test.elf:    build/build/release/src/stub.o $(addprefix $(OUTPUT_DIR)/,$(addsuffix .a,$(VERIFY_LIBS)))
 build/build/debug/baserom.elf:   build/build/release/src/stub.o $(foreach l,$(VERIFY_LIBS),baserom/$(l)D.a)
-build/build/debug/test.elf:      build/build/release/src/stub.o $(foreach l,$(VERIFY_LIBS),$(l)D.a)
+build/build/debug/test.elf:      build/build/release/src/stub.o $(addprefix $(OUTPUT_DIR)/,$(addsuffix D.a,$(VERIFY_LIBS)))
 
 %.bin: %.elf
 	$(OBJCOPY) -O binary $< $@
@@ -195,7 +207,8 @@ build/build/debug/test.elf:      build/build/release/src/stub.o $(foreach l,$(VE
 	@echo Linking ELF $@
 	$(QUIET)$(LD) -T gcn.ld --whole-archive $(filter %.o,$^) $(filter %.a,$^) -o $@ -Map $(@:.elf=.map)
 
-%.a:
+# Update the pattern rule to handle the output directory
+$(OUTPUT_DIR)/%.a:
 	@ test ! -z '$?' || { echo 'no object files for $@'; return 1; }
 	@echo 'Creating static library $@'
 	$(QUIET)$(AR) -v -r $@ $(filter %.o,$?)
