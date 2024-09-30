@@ -1,4 +1,4 @@
-#include "build/include/netcfg/__netcfg.h"
+#include "netcfg/__netcfg.h"
 
 s32 NETCFGGetIpAddress(u32* addr) {
     s32 ret = 0;

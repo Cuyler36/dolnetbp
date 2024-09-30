@@ -1,4 +1,4 @@
-#include "build/include/netcfg/__netcfg.h"
+#include "netcfg/__netcfg.h"
 
 int NETCFGCheckData(void* addr, u32 len, u8* md5Digest);
 void NETCFGDecode(u8* data);

@@ -5,7 +5,7 @@
 ifneq (,$(findstring Windows,$(OS)))
   EXE := .exe
 else
-  WINE ?=
+  WINE := wibo
 endif
 
 # If 0, tells the console to chill out. (Quiets the make process.)
@@ -84,7 +84,7 @@ CC        = $(MWCC)
 
 CHARFLAGS := -char signed
 
-CFLAGS = $(CHARFLAGS) -nodefaults -proc gekko -fp hard -Cpp_exceptions off -enum int -warn pragmas -requireprotos -pragma 'cats off'
+CFLAGS = $(CHARFLAGS) -lang=c++ -nodefaults -proc gekko -fp hard -Cpp_exceptions off -enum int -warn pragmas -requireprotos -pragma 'cats off'
 INCLUDES := -Ibuild/include -Idolphin/include/libc -Idolphin/include -ir build/src
 
 ASFLAGS = -mgekko -I build/src -I build/include
@@ -104,7 +104,7 @@ TARGET_LIBS_DEBUG := $(addprefix baserom/,$(addsuffix .a,$(TARGET_LIBS_DEBUG)))
 
 default: all
 
-all: $(DTK) eth.a ethD.a mdm.a mdmD.a netcfg.a netcfgD.a
+all: $(DTK) eth.a ethD.a mdm.a mdmD.a netcfg.a netcfgD.a stub.o
 
 verify: build/build/release/test.bin build/build/debug/test.bin build/build/verify.sha1
 	@sha1sum -c build/build/verify.sha1
@@ -148,27 +148,40 @@ check-dtk: $(TOOLS_DIR)
 
 $(DTK): check-dtk
 
-build/build/debug/src/%.o: src/%.c
+build/build/debug/build/src/%.o: build/src/%.c
 	@echo 'Compiling $< (debug)'
 	$(QUIET)$(CC) -c -opt level=0 -inline off -schedule off -sym on $(CFLAGS) -I- $(INCLUDES) -DDEBUG $< -o $@
 
-build/build/release/src/%.o: src/%.c
+build/build/release/build/src/%.o: build/src/%.c
 	@echo 'Compiling $< (release)'
 	$(QUIET)$(CC) -c -O4,p -inline auto -sym on $(CFLAGS) -I- $(INCLUDES) -DRELEASE $< -o $@
 
 ################################ Build Files ###############################
 
+# For eth.a
 eth_c_files := $(wildcard build/src/eth/*.c)
-eth.a  : $(addprefix $(BUILD_DIR)/release/,$(eth_c_files:.c=.o))
-ethD.a : $(addprefix $(BUILD_DIR)/debug/,$(eth_c_files:.c=.o))
+eth_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/release/build/src/%.o,$(eth_c_files))
+eth.a : $(eth_obj_files)
 
+# For ethD.a
+ethD_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/debug/build/src/%.o,$(eth_c_files))
+ethD.a : $(ethD_obj_files)
+
+# Similarly for mdm.a and mdmD.a
 mdm_c_files := $(wildcard build/src/mdm/*.c)
-mdm.a  : $(addprefix $(BUILD_DIR)/release/,$(mdm_c_files:.c=.o))
-mdmD.a : $(addprefix $(BUILD_DIR)/debug/,$(mdm_c_files:.c=.o))
+mdm_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/release/build/src/%.o,$(mdm_c_files))
+mdm.a : $(mdm_obj_files)
 
+mdmD_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/debug/build/src/%.o,$(mdm_c_files))
+mdmD.a : $(mdmD_obj_files)
+
+# And for netcfg.a and netcfgD.a
 netcfg_c_files := $(wildcard build/src/netcfg/*.c)
-netcfg.a  : $(addprefix $(BUILD_DIR)/release/,$(netcfg_c_files:.c=.o))
-netcfgD.a : $(addprefix $(BUILD_DIR)/debug/,$(netcfg_c_files:.c=.o))
+netcfg_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/release/build/src/%.o,$(netcfg_c_files))
+netcfg.a : $(netcfg_obj_files)
+
+netcfgD_obj_files := $(patsubst build/src/%.c,$(BUILD_DIR)/debug/build/src/%.o,$(netcfg_c_files))
+netcfgD.a : $(netcfgD_obj_files)
 
 build/build/release/baserom.elf: build/build/release/src/stub.o $(foreach l,$(VERIFY_LIBS),baserom/$(l).a)
 build/build/release/test.elf:    build/build/release/src/stub.o $(foreach l,$(VERIFY_LIBS),$(l).a)
@@ -188,7 +201,7 @@ build/build/debug/test.elf:      build/build/release/src/stub.o $(foreach l,$(VE
 	$(QUIET)$(AR) -v -r $@ $(filter %.o,$?)
 
 # generate baserom hashes
-build/verify.sha1: build/build/release/baserom.bin build/build/debug/baserom.bin
+build/build/verify.sha1: build/build/release/baserom.bin build/build/debug/baserom.bin
 	sha1sum $^ | sed 's/baserom/test/' > $@
 
 # ------------------------------------------------------------------------------

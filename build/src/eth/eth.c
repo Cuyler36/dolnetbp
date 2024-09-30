@@ -1,4 +1,4 @@
-#include "build/include/eth/eth.h"
+#include "eth/eth.h"
 #include <dolphin/os_internal.h>
 
 #ifdef DEBUG
@@ -476,7 +476,7 @@ static void readbuffer1(s32 chan, OSContext* context) {
     __ETHInterruptTime = OSGetTime() - __OSLastInterruptTime;
 }
 
-#include "build/include/eth/hashfunc.c"
+#include "eth/hashfunc.c"
 
 static void patchthru(void) {
     u32 rnda;

@@ -106,15 +106,15 @@ void MD5Init(MD5_CTX *context)
   operation, processing another message block, and updating the
   context.
  */
-void MD5Update(MD5_CTX *context, const unsigned char *input, unsigned int inputLen)
+void MD5Update(MD5_CTX *context, u8 *input, u32 inputLen)
 /* context:  context */
 /* input:    input block */
 /* inputlen: length of input block */
 {
-  unsigned int i, index, partLen;
+  u32 i, index, partLen;
 
   /* Compute number of bytes mod 64 */
-  index = (unsigned int)((context->count[0] >> 3) & 0x3F);
+  index = (u32)((context->count[0] >> 3) & 0x3F);
 
   /* Update number of bits */
   if ((context->count[0] += ((u32)inputLen << 3)) < ((u32)inputLen << 3))
@@ -143,18 +143,18 @@ void MD5Update(MD5_CTX *context, const unsigned char *input, unsigned int inputL
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
   the message digest and zeroizing the context.
  */
-void MD5Final(unsigned char digest[16], MD5_CTX *context)
+void MD5Final(u8 digest[16], MD5_CTX *context)
 /* digest:   message digest */
 /* context:  context */
 {
-  unsigned char bits[8];
-  unsigned int index, padLen;
+  u8 bits[8];
+  u32 index, padLen;
 
   /* Save number of bits */
   Encode (bits, context->count, 8);
 
   /* Pad out to 56 mod 64. */
-  index = (unsigned int)((context->count[0] >> 3) & 0x3f);
+  index = (u32)((context->count[0] >> 3) & 0x3f);
   padLen = (index < 56) ? (56 - index) : (120 - index);
   MD5Update (context, PADDING, padLen);
 
@@ -257,27 +257,27 @@ static void MD5Transform (u32 state[4], u8 block[64])
   memset(x, 0, sizeof(x));
 }
 
-/* Encodes input (u32) into output (unsigned char). Assumes len is
+/* Encodes input (u32) into output (u8). Assumes len is
   a multiple of 4.
  */
 static void Encode(u8* output, u32* input, u32 len)
 {
-  unsigned int i, j;
+  u32 i, j;
 
   for (i = 0, j = 0; j < len; i++, j += 4) {
-    output[j] = (unsigned char)(input[i] & 0xff);
-    output[j+1] = (unsigned char)((input[i] >> 8) & 0xff);
-    output[j+2] = (unsigned char)((input[i] >> 16) & 0xff);
-    output[j+3] = (unsigned char)((input[i] >> 24) & 0xff);
+    output[j] = (u8)(input[i] & 0xff);
+    output[j+1] = (u8)((input[i] >> 8) & 0xff);
+    output[j+2] = (u8)((input[i] >> 16) & 0xff);
+    output[j+3] = (u8)((input[i] >> 24) & 0xff);
   }
 }
 
-/* Decodes input (unsigned char) into output (u32). Assumes len is
+/* Decodes input (u8) into output (u32). Assumes len is
   a multiple of 4.
  */
 static void Decode(u32* output, u8* input, u32 len)
 {
-  unsigned int i, j;
+  u32 i, j;
 
   for (i = 0, j = 0; j < len; i++, j += 4)
     output[i] = ((u32)input[j]) | (((u32)input[j+1]) << 8) |

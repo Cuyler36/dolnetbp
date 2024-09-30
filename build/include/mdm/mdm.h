@@ -54,30 +54,6 @@ typedef struct RECVSTATUS {
     void (*cb)(s32);
 } RECVSTATUS;
 
-inline s32 min(s32 a, s32 b) {
-    if (a < b) {
-        return a;
-    } else {
-        return b;
-    }
-}
-
-static inline u8 lower(u16 x) {
-    return x;
-}
-
-static inline u8 upper(u16 x) {
-    return (x >> 8);
-}
-
-inline char mytoupper(char ch) {
-    if (ch >= 'a' && ch <= 'z') {
-        return ch - 0x20;
-    }
-
-    return ch;
-}
-
 s32 MDMInit(char* countrycode);
 s32 MDMATCommand(char* atcmd);
 s32 MDMAnswer(void (*cb)(s32));
@@ -95,6 +71,7 @@ s32 MDMConnectMode(s32 mode);
 s32 MDMErrorCorrectMode(s32 mode);
 s32 MDMCompressMode(s32 mode);
 s32 MDMGetStatus(MDM_CONNECTSTAT* stat);
+s32 MDMWaitToneMode(s32 mode);
 s32 MDMGetLibraryVersion(void);
 
 #ifdef __cplusplus

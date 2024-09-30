@@ -1,4 +1,4 @@
-#include "build/include/netcfg/__netcfg.h"
+#include "netcfg/__netcfg.h"
 
 s32 NETCFGGetDialType(u8* type) {
     s32 ret = 0;

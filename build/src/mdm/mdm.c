@@ -1,6 +1,6 @@
-#include "build/include/mdm/mdm.h"
-
+#include "mdm/mdm.h"
 #include <dolphin/os_internal.h>
+#include <stdlib.h>
 
 #ifdef DEBUG
 const char* __MDMVersion = "<< Dolphin SDK - MDM\tdebug build: Mar  9 2004 12:31:21 (0x2301) >>";
@@ -54,6 +54,30 @@ static void sendsub3(s32 chan, OSContext* context);
 static void exiinthandler(s32 chan, OSContext* context);
 static void checkatrxbuf(void);
 static void atcommand(char* atcmd);
+
+inline s32 min(s32 a, s32 b) {
+    if (a < b) {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+static inline u8 lower(u16 x) {
+    return x;
+}
+
+static inline u8 upper(u16 x) {
+    return (x >> 8);
+}
+
+inline char mytoupper(char ch) {
+    if (ch >= 'a' && ch <= 'z') {
+        return ch - 0x20;
+    }
+
+    return ch;
+}
 
 static void unlockcallback(s32 chan, OSContext* context) {
     OSWakeupThread(&threadQ);
@@ -352,7 +376,7 @@ static void checkatrxbuf(void) {
                 }
 
                 prevbuf += 8;
-                cs.dtespeed = atoi(prevbuf);
+                cs.dtespeed = atoi((char*)prevbuf);
             } else if (len >= 9 && memcmp(prevbuf, "+MCR: ", 6) == 0) {
                 prevbuf += 6;
                 ASSERTLINE(609, len <= 10);
@@ -499,7 +523,7 @@ static s32 WaitResult(void) {
 }
 
 s32 MDMInit(char* countrycode) {
-    static BOOL firsttime = FALSE;
+    static BOOL firsttime = TRUE;
     static BOOL regflag = FALSE;
 
     u32 cid;
@@ -1012,8 +1036,9 @@ s32 MDMDial(char* dialstr, s32 dialmode, void (*cb)(s32)) {
             if (atAndPFlag != FALSE) {
                 ret = MDMATCommand("AT&P0\r");
                 ASSERTLINE(1444, ret == MDM_OK);
-                strcpy(tmp, "ATDP");
             }
+            
+            strcpy(tmp, "ATDP");
             break;
         case 3:
             if (atAndPFlag != FALSE) {
