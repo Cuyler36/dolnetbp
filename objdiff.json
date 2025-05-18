@@ -1,0 +1,75 @@
+{
+  "$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
+  "custom_make": "make",
+  "custom_args": [],
+  "build_target": false,
+  "build_base": true,
+  "watch_patterns": [
+    "*.c",
+    "*.cp",
+    "*.cpp",
+    "*.cxx",
+    "*.h",
+    "*.hp",
+    "*.hpp",
+    "*.hxx",
+    "*.s",
+    "*.S",
+    "*.asm",
+    "*.inc",
+    "*.py",
+    "*.yml",
+    "*.txt",
+    "*.json"
+  ],
+  "units": [
+    {
+      "name": "eth/eth",
+      "target_path": "baserom/release/build/src/eth/eth.o",
+      "base_path": "build/build/release/build/src/eth/eth.o",
+      "metadata": {}
+    },
+    {
+      "name": "eth/md5",
+      "target_path": "baserom/release/build/src/eth/md5.o",
+      "base_path": "build/build/release/build/src/eth/md5.o",
+      "metadata": {}
+    },
+    {
+      "name": "mdm/mdm",
+      "target_path": "baserom/release/build/src/mdm/mdm.o",
+      "base_path": "build/build/release/build/src/mdm/mdm.o",
+      "metadata": {}
+    },
+    {
+      "name": "netcfg/netcfg",
+      "target_path": "baserom/release/build/src/netcfg/netcfg.o",
+      "base_path": "build/build/release/build/src/netcfg/netcfg.o",
+      "metadata": {}
+    },
+    {
+      "name": "ethD/ethD",
+      "target_path": "baserom/debug/build/src/eth/eth.o",
+      "base_path": "build/build/debug/build/src/eth/eth.o",
+      "metadata": {}
+    },
+    {
+      "name": "ethD/md5D",
+      "target_path": "baserom/debug/build/src/eth/md5.o",
+      "base_path": "build/build/debug/build/src/eth/md5.o",
+      "metadata": {}
+    },
+    {
+      "name": "mdmD/mdmD",
+      "target_path": "baserom/debug/build/src/mdm/mdm.o",
+      "base_path": "build/build/debug/build/src/mdm/mdm.o",
+      "metadata": {}
+    },
+    {
+      "name": "netcfgD/netcfgD",
+      "target_path": "baserom/debug/build/src/netcfg/netcfg.o",
+      "base_path": "build/build/debug/build/src/netcfg/netcfg.o",
+      "metadata": {}
+    }
+  ]
+}

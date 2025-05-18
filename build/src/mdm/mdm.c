@@ -1,6 +1,8 @@
 #include "mdm/mdm.h"
 #include <dolphin/os_internal.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #ifdef DEBUG
 const char* __MDMVersion = "<< Dolphin SDK - MDM\tdebug build: Mar  9 2004 12:31:21 (0x2301) >>";
@@ -660,7 +662,7 @@ s32 MDMATCommand(char* atcmd) {
         return -8;
     }
 
-    for (i = 0; i < ARRAY_COUNT(prohibited_commands); i++) {
+    for (i = 0; i < (u32)ARRAY_COUNT(prohibited_commands); i++) {
         if (memcmp(&atcmd[2], prohibited_commands[i], strlen(prohibited_commands[i])) == 0) {
             return -8;
         }
@@ -674,7 +676,7 @@ s32 MDMATCommand(char* atcmd) {
     return atresult;
 }
 
-static void MDMAtCommandNoWait(char* atcmd) {
+static void MDMATCommandNoWait(char* atcmd) {
     waitexilock();
     atcommand(atcmd);
     EXIUnlock(0);
@@ -703,7 +705,7 @@ s32 MDMAnswer(void (*cb)(s32)) {
 void MDMHangUp(void) {
     memset(&cs, 0, sizeof(cs));
     mdmstatus = 1;
-    MDMAtCommandNoWait("ATH0\r");
+    MDMATCommandNoWait("ATH0\r");
 }
 
 static void atcommand(char* atcmd) {
@@ -865,7 +867,7 @@ s32 MDMRecvSync(u8* buf) {
     return len;
 }
 
-s32 MDSend(u8* buf, s32 len, void (*cb)(s32)) {
+s32 MDMSend(u8* buf, s32 len, void (*cb)(s32)) {
     if (ss.sendbusy) {
         return -4;
     }
@@ -1052,7 +1054,7 @@ s32 MDMDial(char* dialstr, s32 dialmode, void (*cb)(s32)) {
     strcat(tmp, dialstr);
     strcat(tmp, "\r");
     mdmstatus = 2;
-    MDMAtCommandNoWait(tmp);
+    MDMATCommandNoWait(tmp);
     return MDM_OK;
 }
 
@@ -1118,8 +1120,8 @@ s32 MDMConnectMode(s32 mode) {
     }
 
     strcpy(buf, "AT+MS=");
-    strcpy(buf, modestr[mode]);
-    strcpy(buf, "\r");
+    strcat(buf, modestr[mode]);
+    strcat(buf, "\r");
     ret = MDMATCommand(buf);
     ASSERTLINE(1550, ret == MDM_OK);
     return MDM_OK;
@@ -1135,8 +1137,8 @@ s32 MDMErrorCorrectMode(s32 mode) {
     }
 
     strcpy(buf, "AT+ES=");
-    strcpy(buf, modestr[mode]);
-    strcpy(buf, "\r");
+    strcat(buf, modestr[mode]);
+    strcat(buf, "\r");
     ret = MDMATCommand(buf);
     ASSERTLINE(1570, ret == MDM_OK);
     return MDM_OK;
@@ -1152,8 +1154,8 @@ s32 MDMCompressMode(s32 mode) {
     }
 
     strcpy(buf, "AT%C");
-    strcpy(buf, modestr[mode]);
-    strcpy(buf, "\r");
+    strcat(buf, modestr[mode]);
+    strcat(buf, "\r");
     ret = MDMATCommand(buf);
     ASSERTLINE(1589, ret == MDM_OK);
     return MDM_OK;
@@ -1177,8 +1179,8 @@ s32 MDMWaitToneMode(s32 mode) {
     }
 
     strcpy(buf, "ATX");
-    strcpy(buf, modestr[mode]);
-    strcpy(buf, "\r");
+    strcat(buf, modestr[mode]);
+    strcat(buf, "\r");
     ret = MDMATCommand(buf);
     ASSERTLINE(1619, ret == MDM_OK);
     return MDM_OK;

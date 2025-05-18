@@ -60,7 +60,7 @@ s32 MDMAnswer(void (*cb)(s32));
 void MDMHangUp(void);
 s32 MDMRecv(u8* buf, s32 maxlen, void (*cb)(s32));
 s32 MDMRecvSync(u8* buf);
-s32 MDSend(u8* buf, s32 len, void (*cb)(s32));
+s32 MDMSend(u8* buf, s32 len, void (*cb)(s32));
 BOOL MDMSendBusy(void);
 s32 MDMDial(char* dialstr, s32 dialmode, void (*cb)(s32));
 s32 MDMChangeThreshold(s32 txth, s32 rxth);
